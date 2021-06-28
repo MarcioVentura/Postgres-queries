@@ -1,0 +1,770 @@
+Postgresql versão 11:
+
+Shutdown PostgreSQL
+===================
+pg_ctl stop -m fast
+
+Startup PostgreSQL
+=================
+pg_ctl start -l /home/postgres/postgres.log &
+
+Defragmentação e Rebuild de Indices
+=================================
+vacuumdb --all --full --verbose --analyze > vacuumdb.log
+
+Lista todos os processos
+=================================
+psql
+select * from pg_stat_activity;
+
+Encontrar as maiores tabelas e índices
+=================================
+SELECT relname, relpages FROM pg_class ORDER BY relpages DESC;
+
+LISTAR VERSÃO DO BANCO: select version();
+LISTAR CODIGO DO SERVIDOR: show server_encoding;
+LISTAR DADOS DO CATALOGO: select * from pg_catalog.pg_settings ps (temporários para queries etc)
+
+LISTAR TABELAS: select schemaname, tablename FROM pg_tables WHERE tablename NOT LIKE 'pg%' AND tablename NOT LIKE 'sql\_%';
+				select *  FROM information_schema.tables WHERE table_type = 'BASE TABLE' AND table_schema = 'public'
+   
+DESC EM TABELAS: SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_name = 'city';
+LISTAR USUARIOS: select usename FROM pg_user;
+				 select * FROM pg_user where usecreatedb = 'false' and userepl = 'false';
+
+LISTAR TABELAS DO USUARIO: select * from pg_tables where schemaname = 'public';
+
+LISTAR INDICES DO USUÁRIO: select schemaname, indexname from pg_indexes where schemaname ='public' and tablename <> indexname order by 2;
+			   select tablename, indexname, indexdef FROM pg_indexes WHERE schemaname = 'public' ORDER BY tablename, indexname;
+*** ver também o item INDICES ao final com informação de tamanhos de indices e tabelas:
+
+LISTAR SEQUENCES:SELECT * FROM information_schema.sequences;
+DDL DE SEQUENCE: SELECT 'CREATE SEQUENCE ' || sequence_name || ' START ' ||  start_value || ';' from information_schema.sequences;
+
+LISTAR OBJETOS:	select schemaname, tablename from pg_tables where schemaname = 'jpferreira';
+				select schemaname, indexname from pg_indexes where schemaname = 'jpferreira';
+				select * from pg_sequences where schemaname = 'jpferreira';
+				
+				select schemaname, count(1) from pg_tables where schemaname <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
+				select schemaname, count(1) from pg_indexes where schemaname <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
+				select schemaname, count(1) from pg_sequences where schemaname <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
+				select schemaname, count(1) from PG_VIEWS where SCHEMANAME <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
+
+SCHEMAS(Coleção de objetos): SELECT schema_name FROM information_schema.schemata
+							select * from information_schema.information_schema_catalog_name
+							create schema logservico authorization logservico / create schema authorization logservico (create table schema.table...)
+							drop schema xx / drop schema xx cascade
+
+							create schema corp_replica
+							create table corp_replica.tabelanome (name varchar)
+							insert into corp_replica.tabelanome values('marcio')
+							commit
+							select * from corp_replica.tabelanome
+							create user corp_replica with password 'corp_replica';
+							GRANT USAGE ON SCHEMA corp_replica TO corp_replica;
+
+TAMANHO DAS TABELAS:
+select pg_relation_size('cpos_log_rems') "Bytes", pg_relation_size('cpos_log_rems')/1024 "KBytes", 
+pg_relation_size('cpos_log_rems')/1024/1024 "MBytes", pg_relation_size('cpos_log_rems')/1024/1024/1024 "GBytes";
+
+
+TAMANHO DAS TABELAS POR SCHEMA:
+SELECT esquema, tabela, pg_size_pretty(pg_relation_size(esq_tab)) AS tamanho, 
+pg_size_pretty(pg_total_relation_size(esq_tab)) AS tamanho_total 
+FROM (SELECT tablename AS tabela, schemaname AS esquema, schemaname||'.'||tablename AS esq_tab 
+FROM pg_catalog.pg_tables 
+WHERE schemaname NOT IN ('pg_catalog', 'information_schema', 'pg_toast') ) AS x 
+ORDER BY pg_total_relation_size(esq_tab) DESC;
+
+
+TAMANHO DAS TABLESPACES:
+select relname, relpages, reltuples from pg_class where relname like 'cpos%' order by relpages desc
+
+TAMANHO DOS BANCOS DE DADOS:
+(SELECT	datname                                   AS banco,
+	pg_database_size(datname)                 AS tamanho,
+	pg_size_pretty(pg_database_size(datname)) AS tamanho_pretty
+FROM pg_database
+WHERE datname NOT IN ('template0', 'template1') ORDER BY tamanho DESC, banco ASC)
+UNION ALL
+(SELECT	'TOTAL'                                        AS banco,
+	sum(pg_database_size(datname))                 AS tamanho,
+	pg_size_pretty(sum(pg_database_size(datname))) AS tamanho_pretty
+FROM pg_database WHERE datname NOT IN ('template0', 'template1'));
+20091677697-felipe-1609/2020
+
+
+CONTAR A QUANTIDADE DE REGISTROS PARA DETERMINADO SCHEMA:
+SELECT n.nspname,
+        sum(c.reltuples) ::int
+ FROM pg_class c
+      LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE c.relkind = 'r'::char AND
+       nspname = 'cadastro'
+ GROUP BY n.nspname
+
+CONTAR REGISTROS EM TABELAS POR UM UNICO SCHEMA:
+ SELECT n.nspname AS schemaname,
+        c.relname AS tablename,
+        C.reltuples::int AS Registros
+ FROM pg_class c
+      LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+      LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
+ WHERE c.relkind = 'r' ::char and nspname = 'alerta' order by tablename
+
+
+CONTAR REGISTROS POR SCHEMAS:
+SELECT n.nspname,
+        sum(c.reltuples) ::int
+ FROM pg_class c
+      LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE c.relkind = 'r' ::char AND
+       nspname NOT IN ('dbateste', 'information_schema', 'pg_catalog',
+                       'pg_temp_1',' pg_toast', 'postgres', 'publico', 'public')
+ GROUP BY n.nspname
+
+
+CONTAR REGISTROS POR TABELA E SCHEMA:
+SELECT n.nspname AS schemaname,
+        c.relname AS tablename,
+        C.reltuples::int AS Registros
+ FROM pg_class c
+      LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+      LEFT JOIN pg_tablespace t ON t.oid = c.reltablespace
+ WHERE c.relkind = 'r' ::char AND
+       nspname NOT IN ('dbateste', 'information_schema', 'pg_catalog',
+        'pg_temp_1', 'pg_toast', 'postgres', 'publico', 'public')
+ ORDER BY n.nspname
+
+CONTAR/LISTAR TODAS AS TABELAS ORDENADO PELO NUMERO DE REGISTROS:
+SELECT
+   relname,
+   n_live_tup
+FROM
+   pg_stat_user_tables
+ORDER BY
+   n_live_tup DESC;
+   
+
+CONTAR A QUANTIDADE DE REGISTROS PARA O BANCO TODO:
+SELECT sum(C.reltuples)::int
+FROM pg_class C
+WHERE c.relkind = 'r'::char
+
+
+
+CRIAR BANCO DE DADOS:
+create database lusiadas;
+Para criar o banco de dados vendas pertencendo ao usuário usuvendas com o espaço de tabelas padrão espvendas:
+create database vendas owner usuvendas tablespace espvendas;
+
+CRIAR BANCO DE DADOS musica COM SUPORTE AO CONJUNTO DE CARACTERES ISO-8859-1:
+create database musica ENCODING 'LATIN1';
+
+CRIAR SCHEMA:
+create schema 			XXX;
+create user 			XXX with password 'XXX2020';
+GRANT USAGE ON SCHEMA 	XXX TO 			XXX;
+
+CRIAR USUARIO:
+create user datafusion with password 'DevFus20BVS';
+alter user datafusion with password 'DevFus20BVS'
+GRANT EM TABELAS DO PUBLIC PARA O USUÁRIO:
+grant all privileges on all tables in schema public to novoexperto;
+grant select on all tables in schema public to datafusion;
+grant all privileges on database mydb to myuser;
+grant delete on cpos_log_rems to srv_wa;
+
+para o usuario manipular os objetos do outro:
+grant select, insert, update, delete on all tables in schema public to striim_user;
+GRANT USAGE ON SCHEMA alerta TO striim_user;
+GRANT CREATE ON SCHEMA alerta TO striim_user;
+
+
+VER OS GRANTS:
+Por usuário: SELECT grantee, table_name , privilege_type FROM information_schema.role_table_grants
+WHERE 1=1 AND grantee = 'zabbixcheckdb';
+
+SELECT grantee, table_name , privilege_type FROM information_schema.role_table_grants
+WHERE 1=1 AND grantee IN ('zabbixcheckdb','michelle_gregorio','emily_ferreira');
+
+Por tabela: SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants 
+WHERE table_name='cpos_log_rems'
+
+SELECT grantee, table_name , privilege_type FROM information_schema.role_table_g
+REVOGAR GRANTS: revoke truncate, references, trigger on all tables in schema public from zabbixcheckdb;
+
+SELECT * FROM PG_TABLES WHERE SCHEMANAME = 'public' order by 1
+SELECT * FROM PG_TABLES WHERE TABLENAME like 'cpos%'  
+select * from pg_catalog.pg_indexes psai order by schemaname
+select * from pg_catalog.pg_sequences ps 
+SELECT * FROM PG_TABLES WHERE TABLEOWNER = 'comunicapi' OR schemaname  = 'PUBLIC';
+
+SESSÕES E LOCK DE AMBIENTE:
+select * from pg_stat_activity; 
+select datid, datname, usename, application_name, client_addr, query_start, wait_event_type, wait_event, state, query from pg_stat_activity; 
+select *, pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND datname = 'postgres';
+select usename, client_addr, query_start, query from pg_stat_activity order by client_addr ;
+select * from pg_locks;
+
+ESTATISTICAS DE TABELA: 
+select * from pg_catalog.pg_stat_all_tables 
+select * from pg_catalog.pg_stat_all_tables WHERE relname NOT LIKE 'pg%' AND relname NOT LIKE 'sql\_%'; 
+
+
+MATAR A SESSAO COM O OWNER:
+select datid, datname, usename, application_name, client_addr, query_start, pid, wait_event_type, wait_event, state, query from pg_stat_activity; 
+select usename, application_name, client_addr, pid, query from pg_stat_activity; 
+select usename, client_addr, query, query_start, state, wait_event from pg_stat_activity order by client_addr desc;
+SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE pid <> pg_backend_pid();
+
+select c.relname, n.nspname, l.locktype, l.mode, l.granted, l.fastpath
+from
+    pg_locks l
+    inner join
+    pg_database d on l.database = d.oid
+    inner join
+    pg_class c on l.relation = c.oid
+    inner join
+    pg_namespace n on c.relnamespace = n.oid
+where d.datname = 'cpn' and n.nspname = 'public'
+;
+
+CRIAR DBLINK(base prd para prod):
+create extension dblink;
+create server prod_remoto foreign data wrapper dblink options(host '10.77.19.55', dbname 'postgres', port '5432')
+create user mapping for postgres server prod_remoto options (user 'postgres', password 'gcprod');
+grant usage on foreign server prod_remoto to postgres;
+grant usage on foreign server prod_remeto to corp_replica;
+
+O que deu certo: (
+CREATE EXTENSION postgres_fdw;
+
+CREATE SERVER foreign_server
+        FOREIGN DATA WRAPPER postgres_fdw
+        OPTIONS (host '10.77.19.55', port '5432', dbname 'postgres');
+
+CREATE USER MAPPING FOR postgres
+        SERVER foreign_server
+        OPTIONS (user 'postgres', password 'gcprod');
+
+--create role local_user_corp_replica
+		
+CREATE FOREIGN TABLE foreign_table (
+        name varchar
+)
+        SERVER foreign_server
+        OPTIONS (schema_name 'corp_replica', table_name 'tabelanome');    
+
+
+select * from foreign_table ft 
+fabio
+hilario
+marcio
+
+ORACLE:   SELECT * FROM CLIENTESIBM@PROD WHERE USERNAME = 'FABIO'
+POSTGRES: select * from foreign_table ft 
+
+
+Manutenção do DBLINK: 
+drop server foreign_server cascade
+select * from pg_catalog.pg_user_mappings p
+DROP USER MAPPING IF EXISTS for local_user SERVER foreign_server;
+
+
+
+
+LISTAR OS INDICES POR TABELAS:
+SELECT
+	 table_name,
+	 pg_size_pretty(table_size)   || ' (' || CASE WHEN total_size = 0 THEN 0.00 ELSE round(table_size * 100 / total_size) END   || ' %)' AS table_size,
+	 pg_size_pretty(indexes_size) || ' (' || CASE WHEN total_size = 0 THEN 0.00 ELSE round(indexes_size * 100 / total_size) END || ' %)' AS indexes_size,
+	 pg_size_pretty(total_size)                                                                                                          AS total_size
+FROM (
+	(SELECT
+		table_name,
+		pg_table_size(table_name)          AS table_size,
+		pg_indexes_size(table_name)        AS indexes_size,
+		pg_total_relation_size(table_name) AS total_size
+	FROM (
+		SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+		FROM information_schema.tables
+		WHERE NOT table_schema IN ('pg_catalog', 'information_schema')
+	) AS all_tables
+	ORDER BY total_size DESC)
+
+	UNION ALL
+
+	(SELECT
+		'TOTAL',
+		sum(pg_table_size(table_name))          AS table_size,
+		sum(pg_indexes_size(table_name))        AS indexes_size,
+		sum(pg_total_relation_size(table_name)) AS total_size
+	FROM (
+		SELECT ('"' || table_schema || '"."' || table_name || '"') AS table_name
+		FROM information_schema.tables
+		WHERE NOT table_schema IN ('pg_catalog', 'information_schema')
+	) AS all_tables)
+
+) AS pretty_sizes;
+
+
+LISTAR INDICES NÃO UTILIZADOS OU INEFICIENTES:
+WITH
+		table_scans AS (
+			SELECT
+				tables.relid                                           AS relid,
+				tables.schemaname                                      AS schemaname,
+				tables.relname                                         AS tablename,
+				tables.idx_scan                                        AS table_idx_scan_count,
+				tables.idx_tup_fetch                                   AS table_idx_tup_fetch,
+				tables.seq_scan                                        AS table_seq_scan_count,
+				tables.seq_tup_read                                    AS table_seq_tup_read,
+				tables.idx_scan + tables.seq_scan                      AS table_sum_all_scans,
+				tables.n_tup_ins                                       AS table_write_insert_count,
+				tables.n_tup_upd                                       AS table_write_update_count,
+				tables.n_tup_del                                       AS table_write_delete_count,
+				tables.n_tup_ins + tables.n_tup_upd + tables.n_tup_del AS table_sum_all_writes,
+				tables.n_tup_hot_upd                                   AS table_tup_hot_upd_count,
+				tables.n_live_tup                                      AS table_live_tup_count,
+				pg_relation_size(relid)                                AS table_bytes
+			FROM
+				pg_stat_user_tables AS tables
+	),
+		database_writes AS (
+			SELECT sum(table_sum_all_writes) AS database_sum_all_writes
+			FROM table_scans
+	),
+		indexes AS (
+			SELECT
+				idx_stat.relid                        AS relid,
+				idx_stat.indexrelid                   AS indexrelid,
+				idx_stat.schemaname                   AS schemaname,
+				idx_stat.relname                      AS tablename,
+				idx_stat.indexrelname                 AS indexname,
+				idx_stat.idx_scan                     AS index_idx_scan_count,
+				idx_stat.idx_tup_read                 AS index_idx_tup_read,
+				idx_stat.idx_tup_fetch                AS index_idx_tup_fetch,
+				pg_relation_size(idx_stat.indexrelid) AS index_bytes,
+				indexes.indexdef ~* 'USING btree'     AS idx_is_btree
+			FROM
+				pg_stat_user_indexes AS idx_stat
+				JOIN pg_index AS pg_index
+				USING (indexrelid)
+				JOIN pg_indexes AS indexes
+					ON idx_stat.schemaname = indexes.schemaname
+					   AND idx_stat.relname = indexes.tablename
+					   AND idx_stat.indexrelname = indexes.indexname
+			WHERE pg_index.indisunique = FALSE
+	),
+		index_ratios AS (
+			SELECT
+				indexes.schemaname                                                                                                                AS schemaname,
+				indexes.tablename                                                                                                                 AS tablename,
+				indexes.indexname                                                                                                                 AS indexname,
+				indexes.index_idx_scan_count                                                                                                      AS index_idx_scan_count,
+				indexes.index_idx_tup_read                                                                                                        AS index_idx_tup_read,
+				indexes.index_idx_tup_fetch                                                                                                       AS index_idx_tup_fetch,
+				round(CASE WHEN indexes.index_idx_scan_count = 0 OR table_scans.table_live_tup_count = 0
+					THEN -1 :: NUMERIC
+					  ELSE indexes.index_idx_tup_fetch :: NUMERIC / indexes.index_idx_scan_count / table_scans.table_live_tup_count * 100 END, 2) AS idx_pct_table_fetched,
+				table_scans.table_idx_scan_count                                                                                                  AS table_idx_scan_count,
+				table_scans.table_seq_scan_count                                                                                                  AS table_seq_scan_count,
+				table_scans.table_seq_tup_read                                                                                                    AS table_seq_tup_read,
+				table_scans.table_sum_all_scans                                                                                                   AS table_sum_all_scans,
+				round((CASE WHEN table_scans.table_sum_all_scans = 0
+					THEN -1 :: NUMERIC
+					   ELSE indexes.index_idx_scan_count :: NUMERIC / table_scans.table_sum_all_scans * 100 END), 2)                              AS index_scan_pct,
+				table_scans.table_write_insert_count                                                                                              AS table_write_insert_count,
+				table_scans.table_write_update_count                                                                                              AS table_write_update_count,
+				table_scans.table_write_delete_count                                                                                              AS table_write_delete_count,
+				table_scans.table_sum_all_writes                                                                                                  AS table_sum_all_writes,
+				round((CASE WHEN table_scans.table_sum_all_writes = 0
+					THEN indexes.index_idx_scan_count :: NUMERIC
+					   ELSE indexes.index_idx_scan_count :: NUMERIC / table_scans.table_sum_all_writes END), 2)                                   AS scans_per_write,
+				table_scans.table_tup_hot_upd_count                                                                                               AS table_tup_hot_upd_count,
+				table_scans.table_live_tup_count                                                                                                  AS table_live_tup_count,
+				indexes.index_bytes                                                                                                               AS index_bytes,
+				pg_size_pretty(indexes.index_bytes)                                                                                               AS index_size,
+				table_scans.table_bytes                                                                                                           AS table_bytes,
+				pg_size_pretty(table_scans.table_bytes)                                                                                           AS table_size,
+				indexes.idx_is_btree                                                                                                              AS idx_is_btree
+			FROM
+				indexes
+				JOIN table_scans
+				USING (relid)
+	),
+		index_groups AS (
+		SELECT
+			1                    AS grp,
+			'Never Used Indexes' AS reason,
+			*
+		FROM index_ratios
+		WHERE
+			index_ratios.index_idx_scan_count = 0
+			AND index_ratios.idx_is_btree
+
+		UNION ALL
+
+		SELECT
+			2                        AS grp,
+			'Low Scans, High Writes' AS reason,
+			*
+		FROM index_ratios
+		WHERE
+			scans_per_write <= 1
+			AND index_scan_pct < 10
+			AND index_idx_scan_count > 0
+			AND table_sum_all_writes > 100
+			AND idx_is_btree
+
+		UNION ALL
+
+		SELECT
+			3                           AS grp,
+			'Seldom Used Large Indexes' AS reason,
+			*
+		FROM index_ratios
+		WHERE
+			index_scan_pct < 5
+			AND scans_per_write > 1
+			AND index_idx_scan_count > 0
+			AND idx_is_btree
+			AND index_bytes > 100000000
+
+		UNION ALL
+
+		SELECT
+			4                            AS grp,
+			'High-Write Large Non-Btree' AS reason,
+			index_ratios.*
+		FROM index_ratios, database_writes
+		WHERE
+			(table_sum_all_writes :: NUMERIC / COALESCE(NULLIF(database_sum_all_writes, 0), 1)) > 0.02
+			AND NOT idx_is_btree
+			AND index_bytes > 100000000
+
+		UNION ALL
+
+		SELECT
+			5                     AS grp,
+			'(+) Sem Efetividade' AS reason,
+			index_ratios.*
+		FROM index_ratios
+		WHERE
+			idx_is_btree
+			AND index_idx_scan_count > 0
+			AND idx_pct_table_fetched > 20
+
+		UNION ALL
+
+		SELECT
+			6                                  AS grp,
+			'(+) Índice Médio (100MB a 500MB)' AS reason,
+			index_ratios.*
+		FROM index_ratios
+		WHERE
+			index_bytes >= 100000000 AND index_bytes < 500000000
+
+		UNION ALL
+
+		SELECT
+			7                                  AS grp,
+			'(+) Índice Grande (500MB a 1 GB)' AS reason,
+			index_ratios.*
+		FROM index_ratios
+		WHERE
+			index_bytes >= 500000000 AND index_bytes < 1000000000
+
+		UNION ALL
+
+		SELECT
+			8                                  AS grp,
+			'(+) Índice Enorme (mais de 1 GB)' AS reason,
+			index_ratios.*
+		FROM index_ratios
+		WHERE
+			index_bytes >= 1000000000
+
+		ORDER BY grp, index_bytes DESC
+	)
+SELECT
+	reason,
+	schemaname,
+	tablename,
+	indexname,
+	table_size,
+	index_size
+FROM index_groups
+
+
+LISTAR CONSTRAINTS EM TABELAS:
+SELECT
+    tc.constraint_name, tc.table_name, kcu.column_name,
+    ccu.table_name AS foreign_table_name,
+    ccu.column_name AS foreign_column_name
+FROM
+    information_schema.table_constraints AS tc
+    JOIN information_schema.key_column_usage AS kcu
+        ON tc.constraint_name = kcu.constraint_name
+    JOIN information_schema.constraint_column_usage AS ccu
+        ON ccu.constraint_name = tc.constraint_name
+WHERE constraint_type = 'FOREIGN KEY' AND tc.table_name='mytable';
+
+
+LISTAR CONSTRAINTS POR SCHEMA:
+select table_name, constraint_name from information_schema.table_constraints where table_schema = 'pessoajuridica' and constraint_type = 'FOREIGN KEY';
+
+select constraint_schema, table_name, constraint_name, constraint_type from information_schema.table_constraints where table_schema = 'grupos'
+
+GERAR SCRIPT PARA ELIMINAR FOREIGN KEYS NAS TABELAS DO BANCO DE DADOS:
+select 'ALTER TABLE '||CONSTRAINT_SCHEMA||'.'||TABLE_NAME||' drop constraint '||constraint_name||' cascade'||';'
+from information_schema.table_constraints where table_schema = 'pessoajuridica' and constraint_type = 'FOREIGN KEY'
+
+
+
+LISTAR FOREIGN KEYS DAS TABELAS DO BANCO DE DADOS:
+SELECT
+    c.conname nomeForeignKey,
+    c.conrelid::pg_catalog.regclass tabelaOrigem,
+    pg_catalog.pg_get_constraintdef(c.oid, TRUE) AS definicaoForeignKey
+FROM pg_catalog.pg_constraint c
+    JOIN pg_catalog.pg_class r ON r.oid = c.confrelid
+    JOIN pg_catalog.pg_namespace n ON n.oid = r.relnamespace
+    WHERE n.nspname = 'public' AND c.contype = 'f'
+ORDER BY c.conrelid, r.relname, c.conname;
+
+
+LISTAR PROCEDURE:
+select n.nspname as schema_name,
+       p.proname as specific_name,
+       l.lanname as language,
+       pg_get_function_arguments(p.oid) as arguments
+from pg_proc p
+left join pg_namespace n on p.pronamespace = n.oid
+left join pg_language l on p.prolang = l.oid
+left join pg_type t on t.oid = p.prorettype 
+where n.nspname not in ('pg_catalog', 'information_schema')
+      and p.prokind = 'p' and p.proname in ('delete_log_x','delete_chunk')
+order by schema_name,
+         specific_name;
+
+
+
+REMOVER LINHAS DUPLICADAS:
+select CD_CLIENTE, COUNT( CD_CLIENTE )
+FROM alerta.ALT_TB_ACESSO_LOCK 
+GROUP BY CD_CLIENTE
+HAVING COUNT( CD_CLIENTE )> 1
+ORDER BY COUNT( CD_CLIENTE ) DESC;
+
+DELETE from alerta.ALT_TB_ACESSO_LOCK a
+        USING alerta.ALT_TB_ACESSO_LOCK b
+where a.CD_CLIENTE < B.CD_CLIENTE
+       AND a.CD_CLIENTE = b.CD_CLIENTE;
+
+
+select n.nspname as schema_name,
+       p.proname as specific_name,
+       case p.prokind 
+            when 'f' then 'FUNCTION'
+            when 'p' then 'PROCEDURE'
+            when 'a' then 'AGGREGATE'
+            when 'w' then 'WINDOW'
+            end as kind,
+       l.lanname as language,
+       case when l.lanname = 'internal' then p.prosrc
+            else pg_get_functiondef(p.oid)
+            end as definition,
+       pg_get_function_arguments(p.oid) as arguments,
+       t.typname as return_type
+from pg_proc p
+left join pg_namespace n on p.pronamespace = n.oid
+left join pg_language l on p.prolang = l.oid
+left join pg_type t on t.oid = p.prorettype 
+where n.nspname not in ('pg_catalog', 'information_schema')
+order by schema_name,
+         specific_name;
+
+         
+CRIAR PROCEDURE:        
+create or replace procedure delete_log_x(COD_ISPB VARCHAR, REMS INTEGER)
+as
+'declare 
+   counter integer := 1;
+begin
+    RAISE NOTICE ''Apagando registros X da ...'';
+    RAISE NOTICE ''  Fonte  : % '', COD_ISPB;
+    RAISE NOTICE ''  Remessa: % '', REMS;
+
+  loop
+    if EXISTS (SELECT 1 FROM CPOS_LOG_REMS
+                    WHERE  COD_ISPB_INFT = COD_ISPB
+                        AND NRO_REMS = REMS
+                        AND COD_TIP_MSG = ''X''
+                        AND COD_TIP_ARQ IN (111, 25)) THEN
+        call delete_chunk(COD_ISPB, REMS);
+        RAISE NOTICE ''Apagou % Milhoes...'', counter;
+        counter := counter + 1;
+    else
+        RAISE NOTICE ''Terminou sem achar registros do tipo X na fonte: %'',COD_ISPB;
+        return;
+    end if;
+  end loop;
+end;'
+LANGUAGE plpgsql;
+-- Para clientes Java, descomentar a proxima linha
+-- /
+
+
+AJUSTE DE COLUNA EM TABELA:
+alter table cpos_mail_arq ALTER COLUMN MAIL TYPE VARCHAR(150)
+
+
+AUTOVACCUM  - VERIFICAÇÃO DA ATIVIDADE DE ESTATISTICAS DE PERFORMANCE
+
+select 
+	now() as "HORA VERIFICAÇÃO", 
+	* from pg_stat_user_tables 
+
+select 
+	now() as "HORA VERIFICAÇÃO", 
+	* from pg_stat_user_tables 
+		where relname = 'cpos_log_rems';
+		
+		
+-- ---------------------------------------------------------------
+-- Verificando o tamanho da tabela em bytes, kbytes e GigaBytes novamente
+-- ---------------------------------------------------------------
+pghelp=# select 
+ pg_relation_size('cpos_log_rems') "Bytes",
+ pg_relation_size('cpos_log_rems')/1024 "KBytes",
+ pg_relation_size('cpos_log_rems')/1024/1024 "MBytes",
+ pg_relation_size('cpos_log_rems')/1024/1024/1024 "GBytes";
+
+
+SELECT n.nspname as "Schema",
+  c.relname as "Tabela",
+  pg_catalog.pg_size_pretty(pg_table_size(c.oid)) as "Tamanho",
+  pg_catalog.pg_size_pretty(pg_total_relation_size(c.oid)) as "Tamanho total"
+FROM pg_catalog.pg_class c
+     LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relkind IN ('r','')
+      AND n.nspname <> 'pg_catalog'
+      AND n.nspname <> 'information_schema'
+      AND n.nspname !~ '^pg_toast'
+      AND pg_catalog.pg_table_is_visible(c.oid)
+  --    AND pg_table_size(c.oid) > 1073741824 -- >1GB
+ORDER BY pg_table_size(c.oid) DESC,1,2;
+
+
+
+PARTICIONAMETO DE TABELAS: https://www.devmedia.com.br/postgresql-partition-trabalhando-com-particoes-no-postgresql/33969
+https://www.savepoint.blog.br/2013/01/08/particionamento-de-tabelas-no-postgres-quando/
+
+
+| ---------------------------------------|--------------------------------|
+| ORACLE								   POSTGRESSQL					  |
+| ---------------------------------------|--------------------------------|
+| BFILE							     	 | VARCHAR(255)                   |
+| BINARY_FLOAT					     	 | REAL                           |
+| BINARY_DOUBLE					     	 | DOUBLE PRECISION               |
+| BLOB							     	 | BYTEA                          |
+| CHAR(n), CHARACTER(n)			     	 | CHAR(n), CHARACTER(n)          |
+| CLOB							     	 | TEXT                           |
+| DATE							     	 | TIMESTAMP                      |
+| DECIMAL(p,s), DEC(p,s)		     		 | DECIMAL(p,s), DEC(p,s)     |
+| DOUBLE PRECISION				     	 | DOUBLE PRECISION               |
+| FLOAT(p)						     	 | DOUBLE PRECISION               |
+| INT, INTEGER					     	 | INT, INTEGER                   |
+| LONG							     	 | TEXT                           |
+| LONG RAW						     	 | BYTEA                          |
+| NCHAR(n)						     	 | CHAR(n)                        |
+| NCHAR VARYING(n)				     	 | VARCHAR(n)                     |
+| NCLOB							     	 | TEXT                           |
+| NUMBER(p,0), NUMBER(p), 1 <= p < 5	 | SMALLINT                       |
+| NUMBER(p,0), NUMBER(p), 5 <= p < 9	 | INT                            |
+| NUMBER(p,0), NUMBER(p), 9 <= p < 19	 | BIGINT                         |
+| NUMBER(p,0), NUMBER(p), p >= 19		 | DECIMAL(p)                     |
+| NUMBER(p,s)							 | DECIMAL(p,s)                   |
+| NUMBER, NUMBER(*)						 | DOUBLE PRECISION               |
+| NUMERIC(p,s)							 | NUMERIC(p,s)                   |
+| NVARCHAR2(n)							 | VARCHAR(n)                     |
+| RAW(n)								 | BYTEA                          |
+| REAL									 | DOUBLE PRECISION               |
+| ROWID									 | CHAR(10)                       |
+| SMALLINT								 | SMALLINT                       |
+| TIMESTAMP(p)							 | TIMESTAMP(p)                   |
+| TIMESTAMP(p) WITH TIME ZONE			 | TIMESTAMP(p) WITH TIME ZONE    |
+| VARCHAR(n)							 | VARCHAR(n)                     |
+| VARCHAR2(n)							 | VARCHAR(n)                     |
+| XMLTYPE								 | XML                            |
+| ---------------------------------------|--------------------------------|
+
+
+
+
+
+OBJETOS:
+pg_aggregate
+pg_am
+pg_amop
+pg_amproc
+pg_attrdef
+pg_attribute
+pg_auth_members
+pg_authid
+pg_cast
+pg_class
+pg_collation
+pg_constraint
+pg_conversion
+pg_database
+pg_db_role_setting
+pg_default_acl
+pg_depend
+pg_description
+pg_enum
+pg_event_trigger
+pg_extension
+pg_foreign_data_wrapper
+pg_foreign_server
+pg_foreign_table
+pg_index
+pg_inherits
+pg_init_privs
+pg_language
+pg_largeobject
+pg_largeobject_metadata
+pg_namespace
+pg_opclass
+pg_operator
+pg_opfamily
+pg_partitioned_table
+pg_pltemplate
+pg_policy
+pg_proc
+pg_publication
+pg_publication_rel
+pg_range
+pg_replication_origin
+pg_rewrite
+pg_seclabel
+pg_sequence
+pg_shdepend
+pg_shdescription
+pg_shseclabel
+pg_statistic
+pg_statistic_ext
+pg_subscription
+pg_subscription_rel
+pg_tablespace
+pg_transform
+pg_trigger
+pg_ts_config
+pg_ts_config_map
+pg_ts_dict
+pg_ts_parser
+pg_ts_template
+pg_type
+pg_user_mapping
