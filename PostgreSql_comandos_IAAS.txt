@@ -1,0 +1,653 @@
+Connected, host fingerprint: ssh-rsa 0 C0:1B:7E:30:4D:F8:64:41:74:5F:E7:A8:46:4A:89:0D:59:63:A9:D4
+Last login: Thu Oct 29 03:29:16 2020 from 35.235.241.160
+[marcio_ventura@gc-prod-hml-iaas ~]$ sudo su - 
+[root@gc-prod-hml-iaas ~]# yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-6-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+Loaded plugins: security
+Setting up Install Process
+pgdg-redhat-repo-latest.noarch.rpm                                                          | 6.5 kB     00:00     
+Examining /var/tmp/yum-root-6oadUP/pgdg-redhat-repo-latest.noarch.rpm: pgdg-redhat-repo-42.0-11.noarch
+Marking /var/tmp/yum-root-6oadUP/pgdg-redhat-repo-latest.noarch.rpm to be installed
+epel/metalink                                                                               |  14 kB     00:00     
+google-compute-engine/signature                                                             |  454 B     00:00     
+google-compute-engine/signature                                                             | 1.4 kB     00:00 ... 
+rhui-rhel-6-server-rhui-extras-rpms                                                         | 1.8 kB     00:00     
+rhui-rhel-6-server-rhui-optional-rpms                                                       | 2.0 kB     00:00     
+rhui-rhel-6-server-rhui-rh-common-rpms                                                      | 2.1 kB     00:00     
+rhui-rhel-6-server-rhui-rpms                                                                | 2.0 kB     00:00     
+rhui-rhel-6-server-rhui-supplementary-rpms                                                  | 2.0 kB     00:00     
+rhui-rhel-server-rhscl-6-rhui-rpms                                                          | 2.0 kB     00:00     
+Resolving Dependencies
+--> Running transaction check
+---> Package pgdg-redhat-repo.noarch 0:42.0-11 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+===================================================================================================================
+ Package                     Arch              Version            Repository                                  Size
+===================================================================================================================
+Installing:
+ pgdg-redhat-repo            noarch            42.0-11            /pgdg-redhat-repo-latest.noarch             11 k
+
+Transaction Summary
+===================================================================================================================
+Install       1 Package(s)
+
+Total size: 11 k
+Installed size: 11 k
+Downloading Packages:
+Running rpm_check_debug
+Running Transaction Test
+Transaction Test Succeeded
+Running Transaction
+  Installing : pgdg-redhat-repo-42.0-11.noarch                                                                 1/1 
+  Verifying  : pgdg-redhat-repo-42.0-11.noarch                                                                 1/1 
+
+Installed:
+  pgdg-redhat-repo.noarch 0:42.0-11                                                                                
+
+Complete!
+[root@gc-prod-hml-iaas ~]# yum install -y postgresql13-server
+Loaded plugins: security
+Setting up Install Process
+pgdg-common                                                                                 | 2.9 kB     00:00     
+pgdg-common/primary_db                                                                      |  80 kB     00:00     
+pgdg10                                                                                      | 3.7 kB     00:00     
+pgdg10/primary_db                                                                           | 174 kB     00:00     
+pgdg11                                                                                      | 3.6 kB     00:00     
+pgdg11/primary_db                                                                           | 168 kB     00:00     
+pgdg12                                                                                      | 3.6 kB     00:00     
+pgdg12/primary_db                                                                           | 142 kB     00:00     
+pgdg95                                                                                      | 3.7 kB     00:00     
+pgdg95/primary_db                                                                           | 172 kB     00:00     
+pgdg96                                                                                      | 3.7 kB     00:00     
+pgdg96/primary_db                                                                           | 185 kB     00:00     
+No package postgresql13-server available.
+Error: Nothing to do
+[root@gc-prod-hml-iaas ~]# service postgresql-13 initdb
+postgresql-13: unrecognized service
+[root@gc-prod-hml-iaas ~]# service postgresql-13 initdb
+postgresql-13: unrecognized service
+[root@gc-prod-hml-iaas ~]# chkconfig postgresql-13 on
+error reading information on service postgresql-13: No such file or directory
+[root@gc-prod-hml-iaas ~]# service postgresql-13 start
+postgresql-13: unrecognized service
+[root@gc-prod-hml-iaas ~]# 
+
+
+root@gc-prod-hml-iaas ~]# yum install postgresql-server
+Loaded plugins: security
+Setting up Install Process
+Resolving Dependencies
+--> Running transaction check
+---> Package postgresql-server.x86_64 0:8.4.20-8.el6_9 will be installed
+--> Processing Dependency: postgresql-libs(x86-64) = 8.4.20-8.el6_9 for package: postgresql-server-8.4.20-8.el6_9.x86_64
+--> Processing Dependency: postgresql(x86-64) = 8.4.20-8.el6_9 for package: postgresql-server-8.4.20-8.el6_9.x86_64
+--> Processing Dependency: libpq.so.5()(64bit) for package: postgresql-server-8.4.20-8.el6_9.x86_64
+--> Running transaction check
+---> Package postgresql.x86_64 0:8.4.20-8.el6_9 will be installed
+---> Package postgresql-libs.x86_64 0:8.4.20-8.el6_9 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+===================================================================================================================
+ Package                    Arch            Version                    Repository                             Size
+===================================================================================================================
+Installing:
+ postgresql-server          x86_64          8.4.20-8.el6_9             rhui-rhel-6-server-rhui-rpms          3.4 M
+Installing for dependencies:
+ postgresql                 x86_64          8.4.20-8.el6_9             rhui-rhel-6-server-rhui-rpms          2.6 M
+ postgresql-libs            x86_64          8.4.20-8.el6_9             rhui-rhel-6-server-rhui-rpms          202 k
+
+Transaction Summary
+===================================================================================================================
+Install       3 Package(s)
+
+Total download size: 6.2 M
+Installed size: 29 M
+Is this ok [y/N]: y
+Downloading Packages:
+(1/3): postgresql-8.4.20-8.el6_9.x86_64.rpm                                                 | 2.6 MB     00:01     
+(2/3): postgresql-libs-8.4.20-8.el6_9.x86_64.rpm                                            | 202 kB     00:00     
+(3/3): postgresql-server-8.4.20-8.el6_9.x86_64.rpm                                          | 3.4 MB     00:01     
+-------------------------------------------------------------------------------------------------------------------
+Total                                                                              557 kB/s | 6.2 MB     00:11     
+Running rpm_check_debug
+Running Transaction Test
+Transaction Test Succeeded
+Running Transaction
+  Installing : postgresql-libs-8.4.20-8.el6_9.x86_64                                                           1/3 
+  Installing : postgresql-8.4.20-8.el6_9.x86_64                                                                2/3 
+  Installing : postgresql-server-8.4.20-8.el6_9.x86_64                                                         3/3 
+  Verifying  : postgresql-server-8.4.20-8.el6_9.x86_64                                                         1/3 
+  Verifying  : postgresql-libs-8.4.20-8.el6_9.x86_64                                                           2/3 
+  Verifying  : postgresql-8.4.20-8.el6_9.x86_64                                                                3/3 
+
+Installed:
+  postgresql-server.x86_64 0:8.4.20-8.el6_9                                                                        
+
+Dependency Installed:
+  postgresql.x86_64 0:8.4.20-8.el6_9                    postgresql-libs.x86_64 0:8.4.20-8.el6_9                   
+
+Complete!
+[root@gc-prod-hml-iaas ~]# 
+
+
+[root@gc-prod-hml-iaas ~]# ps -ef | grep postgre
+root     22905 22826  0 11:42 pts/0    00:00:00 grep postgre
+[root@gc-prod-hml-iaas ~]# service postgresql start
+
+/var/lib/pgsql/data is missing. Use "service postgresql initdb" to initialize the cluster first.
+                                                           [FAILED]
+[root@gc-prod-hml-iaas ~]# service postgresql initdb
+Initializing database:                                     [  OK  ]
+[root@gc-prod-hml-iaas ~]# chkconfig postgresql on
+[root@gc-prod-hml-iaas ~]# service postgresql start
+Starting postgresql service:                               [  OK  ]
+[root@gc-prod-hml-iaas ~]# 
+[root@gc-prod-hml-iaas ~]# 
+[root@gc-prod-hml-iaas ~]# 
+[root@gc-prod-hml-iaas ~]# su postgres
+bash-4.1$ psql
+could not change directory to "/root"
+psql (8.4.20)
+Type "help" for help.
+
+postgres=# show dabatases
+postgres-# 
+postgres-# 
+postgres-# list tablespaces
+postgres-# \d
+No relations found.
+postgres-# \db
+       List of tablespaces
+    Name    |  Owner   | Location 
+------------+----------+----------
+ pg_default | postgres | 
+ pg_global  | postgres | 
+(2 rows)
+
+postgres-# Connected, host fingerprint: ssh-rsa 0 C0:1B:7E:30:4D:F8:64:41:74:5F:E7:A8:46:4A:89:0D:59:63:A9:D4
+Last login: Thu Oct 29 11:29:45 2020 from 35.235.241.161
+[marcio_ventura@gc-prod-hml-iaas ~]$ 
+
+
+
+COMANDOS - 
+postgres-#  \?
+General
+  \copyright             show PostgreSQL usage and distribution terms
+  \g [FILE] or ;         execute query (and send results to file or |pipe)
+  \h [NAME]              help on syntax of SQL commands, * for all commands
+  \q                     quit psql
+
+Query Buffer
+  \e [FILE]              edit the query buffer (or file) with external editor
+  \ef [FUNCNAME]         edit function definition with external editor
+  \p                     show the contents of the query buffer
+  \r                     reset (clear) the query buffer
+  \s [FILE]              display history or save it to file
+  \w FILE                write query buffer to file
+
+Input/Output
+  \copy ...              perform SQL COPY with data stream to the client host
+  \echo [STRING]         write string to standard output
+  \i FILE                execute commands from file
+  \o [FILE]              send all query results to file or |pipe
+  \qecho [STRING]        write string to query output stream (see \o)
+
+Informational
+  (options: S = show system objects, + = additional detail)
+  \d[S+]                 list tables, views, and sequences
+  \d[S+]  NAME           describe table, view, sequence, or index
+  \da[+]  [PATTERN]      list aggregates
+  \db[+]  [PATTERN]      list tablespaces
+  \dc[S]  [PATTERN]      list conversions
+  \dC     [PATTERN]      list casts
+  \dd[S]  [PATTERN]      show comments on objects
+  \dD[S]  [PATTERN]      list domains
+  \des[+] [PATTERN]      list foreign servers
+  \deu[+] [PATTERN]      list user mappings
+  \dew[+] [PATTERN]      list foreign-data wrappers
+  \df[antw][S+] [PATRN]  list [only agg/normal/trigger/window] functions
+  \dF[+]  [PATTERN]      list text search configurations
+  \dFd[+] [PATTERN]      list text search dictionaries
+  \dFp[+] [PATTERN]      list text search parsers
+  \dFt[+] [PATTERN]      list text search templates
+  \dg[+]  [PATTERN]      list roles (groups)
+  \di[S+] [PATTERN]      list indexes
+  \dl                    list large objects, same as \lo_list
+  \dn[+]  [PATTERN]      list schemas
+  \do[S]  [PATTERN]      list operators
+  \dp     [PATTERN]      list table, view, and sequence access privileges
+  \ds[S+] [PATTERN]      list sequences
+  \dt[S+] [PATTERN]      list tables
+  \dT[S+] [PATTERN]      list data types
+  \du[+]  [PATTERN]      list roles (users)
+  \dv[S+] [PATTERN]      list views
+  \l[+]                  list all databases
+  \z      [PATTERN]      same as \dp
+
+Formatting
+  \a                     toggle between unaligned and aligned output mode
+  \C [STRING]            set table title, or unset if none
+  \f [STRING]            show or set field separator for unaligned query output
+  \H                     toggle HTML output mode (currently off)
+  \pset NAME [VALUE]     set table output option
+                         (NAME := {format|border|expanded|fieldsep|footer|null|
+                         numericlocale|recordsep|tuples_only|title|tableattr|pager})
+  \t [on|off]            show only rows (currently off)
+  \T [STRING]            set HTML <table> tag attributes, or unset if none
+  \x [on|off]            toggle expanded output (currently off)
+
+Connection
+  \c[onnect] [DBNAME|- USER|- HOST|- PORT|-]
+                         connect to new database (currently "postgres")
+  \encoding [ENCODING]   show or set client encoding
+  \password [USERNAME]   securely change the password for a user
+
+Operating System
+  \cd [DIR]              change the current working directory
+  \timing [on|off]       toggle timing of commands (currently off)
+  \! [COMMAND]           execute command in shell or start interactive shell
+
+Variables
+  \prompt [TEXT] NAME    prompt user to set internal variable
+  \set [NAME [VALUE]]    set internal variable, or list all if no parameters
+  \unset NAME            unset (delete) internal variable
+
+Large Objects
+  \lo_export LOBOID FILE
+  \lo_import FILE [COMMENT]
+  \lo_list
+  \lo_unlink LOBOID      large object operations
+postgres-# 
+postgres-# 
+
+
+
+
+
+
+#####################################################################################################################################
+#
+#					RECRIADO O AMBIENTE EM CENTO-OS E REINSTALADO O POSTGRESSQL
+#
+####################################################################################################################################
+[marcio_ventura@gc-hmlgo-prod-iaas ~]$ 
+[marcio_ventura@gc-hmlgo-prod-iaas ~]$ yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-6-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+Error: This command has to be run under the root user.
+[marcio_ventura@gc-hmlgo-prod-iaas ~]$ SUDO SU - 
+# "#" anywhere on a line.  The complete list of parameter names and allowed
+Enabling module streams:
+ postgresql                                                                                 10                                                                                                                       
+
+Transaction Summary
+======================================================================================================================================================================================================================
+Install  3 Packages
+
+Total download size: 7.0 M
+Installed size: 27 M
+Is this ok [y/N]: y
+Downloading Packages:
+(1/3): libpq5-13.0-10PGDG.rhel8.x86_64.rpm                                                                                                                                            202 kB/s | 450 kB     00:02    
+(2/3): postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64.rpm                                                                                                                      404 kB/s | 1.5 MB     00:03    
+(3/3): postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64.rpm                                                                                                               451 kB/s | 5.0 MB     00:11    
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Total                                                                                                                                                                                 596 kB/s | 7.0 MB     00:11     
+warning: /var/cache/dnf/pgdg-common-38b6c5045045f841/packages/libpq5-13.0-10PGDG.rhel8.x86_64.rpm: Header V4 DSA/SHA1 Signature, key ID 442df0f8: NOKEY
+PostgreSQL common RPMs for RHEL/CentOS 8 - x86_64                                                                                                                                     1.6 MB/s | 1.7 kB     00:00    
+Importing GPG key 0x442DF0F8:
+ Userid     : "PostgreSQL RPM Building Project <pgsqlrpms-hackers@pgfoundry.org>"
+ Fingerprint: 68C9 E2B9 1A37 D136 FE74 D176 1F16 D2E1 442D F0F8
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+
+root@gc-prod-hml-iaas ~]# yum install postgresql-server
+Is this ok [y/N]: y
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                                                              1/1 
+  Installing       : libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                              1/3 
+  Running scriptlet: libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                              1/3 
+  Installing       : postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                        2/3 
+  Running scriptlet: postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                 3/3 
+  Installing       : postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                 3/3 
+  Running scriptlet: postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                 3/3 
+  Verifying        : postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                        1/3 
+  Verifying        : postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                                 2/3 
+  Verifying        : libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                              3/3 
+
+Installed:
+  libpq5-13.0-10PGDG.rhel8.x86_64                       postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                       postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                      
+
+Complete!
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# service postgresql initdb
+Hint: the preferred way to do this is now "/usr/bin/postgresql-setup --initdb --unit postgresql"
+ * Initializing database in '/var/lib/pgsql/data'
+  * Initialized, logs are in /var/lib/pgsql/initdb_postgresql.log
+[root@gc-hmlgo-prod-iaas ~]# chkconfig postgresql on
+Note: Forwarding request to 'systemctl enable postgresql.service'.
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# vi /var/lib/pgsql/data/postgresql.conf 
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# -- LISTEN = '*'
+-bash: --: command not found
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# service postgresql start
+Redirecting to /bin/systemctl start postgresql.service
+[root@gc-hmlgo-prod-iaas ~]# 
+[root@gc-hmlgo-prod-iaas ~]# su postgres
+bash-4.4$ psql
+psql: /lib64/libpq.so.5: no version information available (required by psql)
+psql: /lib64/libpq.so.5: no version information available (required by psql)
+could not change directory to "/root": Permission denied
+psql (10.14)
+Type "help" for help.
+
+postgres=# \db
+       List of tablespaces
+    Name    |  Owner   | Location 
+------------+----------+----------
+ pg_default | postgres | 
+ pg_global  | postgres | 
+(2 rows)
+
+postgres=# 
+
+
+
+
+[root@gc-hmlgo-prd-iaas extension]# 
+[root@gc-hmlgo-prd-iaas extension]# yum install -y postgresql-contrib-10.14
+Last metadata expiration check: 1:11:04 ago on Sat 31 Oct 2020 07:26:45 PM UTC.
+Dependencies resolved.
+===================================================================================================================
+ Package                     Architecture    Version                                      Repository          Size
+===================================================================================================================
+Installing:
+ postgresql-contrib          x86_64          10.14-1.module_el8.2.0+487+53cc39ce          AppStream          804 k
+Installing dependencies:
+ libxslt                     x86_64          1.1.32-4.el8                                 BaseOS             249 k
+ perl-Carp                   noarch          1.42-396.el8                                 BaseOS              30 k
+ perl-Exporter               noarch          5.72-396.el8                                 BaseOS              34 k
+ perl-libs                   x86_64          4:5.26.3-416.el8                             BaseOS             1.6 M
+ uuid                        x86_64          1.6.2-42.el8                                 AppStream           63 k
+
+Transaction Summary
+===================================================================================================================
+Install  6 Packages
+
+Total download size: 2.7 M
+Installed size: 9.3 M
+Downloading Packages:
+(1/6): libxslt-1.1.32-4.el8.x86_64.rpm                                             1.1 MB/s | 249 kB     00:00    
+(2/6): uuid-1.6.2-42.el8.x86_64.rpm                                                256 kB/s |  63 kB     00:00    
+(3/6): perl-Carp-1.42-396.el8.noarch.rpm                                           548 kB/s |  30 kB     00:00    
+(4/6): perl-Exporter-5.72-396.el8.noarch.rpm                                       314 kB/s |  34 kB     00:00    
+(5/6): postgresql-contrib-10.14-1.module_el8.2.0+487+53cc39ce.x86_64.rpm           1.5 MB/s | 804 kB     00:00    
+(6/6): perl-libs-5.26.3-416.el8.x86_64.rpm                                         5.1 MB/s | 1.6 MB     00:00    
+-------------------------------------------------------------------------------------------------------------------
+Total                                                                              1.6 MB/s | 2.7 MB     00:01     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                           1/1 
+  Installing       : perl-Exporter-5.72-396.el8.noarch                                                         1/6 
+  Installing       : perl-libs-4:5.26.3-416.el8.x86_64                                                         2/6 
+  Installing       : perl-Carp-1.42-396.el8.noarch                                                             3/6 
+  Installing       : libxslt-1.1.32-4.el8.x86_64                                                               4/6 
+  Installing       : uuid-1.6.2-42.el8.x86_64                                                                  5/6 
+  Running scriptlet: uuid-1.6.2-42.el8.x86_64                                                                  5/6 
+  Installing       : postgresql-contrib-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                             6/6 
+  Running scriptlet: postgresql-contrib-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                             6/6 
+  Verifying        : postgresql-contrib-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                             1/6 
+  Verifying        : uuid-1.6.2-42.el8.x86_64                                                                  2/6 
+  Verifying        : libxslt-1.1.32-4.el8.x86_64                                                               3/6 
+  Verifying        : perl-Carp-1.42-396.el8.noarch                                                             4/6 
+  Verifying        : perl-Exporter-5.72-396.el8.noarch                                                         5/6 
+  Verifying        : perl-libs-4:5.26.3-416.el8.x86_64                                                         6/6 
+
+Installed:
+  libxslt-1.1.32-4.el8.x86_64                                            perl-Carp-1.42-396.el8.noarch             
+  perl-Exporter-5.72-396.el8.noarch                                      perl-libs-4:5.26.3-416.el8.x86_64         
+  postgresql-contrib-10.14-1.module_el8.2.0+487+53cc39ce.x86_64          uuid-1.6.2-42.el8.x86_64                  
+
+Complete!
+[root@gc-hmlgo-prd-iaas extension]# 
+
+
+
+
+
+
+
+
+
+
+
+
+dsf
+sdfsdafsda
+sdff
+sdfsdafsdafsda
+fsdaf
+dsfsadf
+sadf
+sdaf
+sadfsad
+fsad
+f
+
+
+
+
+Connected, host fingerprint: ssh-rsa 0 37:28:31:0F:88:06:12:22:3C:69:20:35:42:99:4B:6D:1C:00:22:07:DB:A9:20:36:46:F2:3A:C2:B1:17:D9:C6
+[marcio_ventura@gc-hmlgo-prd-iaas ~]$ sudo su - 
+[root@gc-hmlgo-prd-iaas ~]# yum install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-6-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+Last metadata expiration check: 0:52:58 ago on Thu 29 Oct 2020 07:27:42 PM UTC.
+pgdg-redhat-repo-latest.noarch.rpm                                                                                                                                                                                    5.6 kB/s | 6.5 kB     00:01    
+Dependencies resolved.
+======================================================================================================================================================================================================================================================
+ Package                                                          Architecture                                           Version                                                   Repository                                                    Size
+======================================================================================================================================================================================================================================================
+Installing:
+ pgdg-redhat-repo                                                 noarch                                                 42.0-11                                                   @commandline                                                 6.5 k
+
+Transaction Summary
+======================================================================================================================================================================================================================================================
+Install  1 Package
+
+Total size: 6.5 k
+Installed size: 11 k
+Downloading Packages:
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                                                                                              1/1 
+  Installing       : pgdg-redhat-repo-42.0-11.noarch                                                                                                                                                                                              1/1 
+  Verifying        : pgdg-redhat-repo-42.0-11.noarch                                                                                                                                                                                              1/1 
+
+Installed:
+  pgdg-redhat-repo-42.0-11.noarch                                                                                                                                                                                                                     
+
+Complete!
+# Any parameter can also be given as a command-line option to the server, e.g.,
+PostgreSQL common RPMs for RHEL/CentOS 8 - x86_64                                                                                                                            1.6 MB/s | 1.7 kB     00:00    
+Importing GPG key 0x442DF0F8:
+ Userid     : "PostgreSQL RPM Building Project <pgsqlrpms-hackers@pgfoundry.org>"
+ Fingerprint: 68C9 E2B9 1A37 D136 FE74 D176 1F16 D2E1 442D F0F8
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-PGDG
+Is this ok [y/N]: y
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                                                                                                                                     1/1 
+  Installing       : libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                     1/3 
+  Running scriptlet: libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                     1/3 
+  Installing       : postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                               2/3 
+  Running scriptlet: postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                        3/3 
+  Installing       : postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                        3/3 
+  Running scriptlet: postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                        3/3 
+  Verifying        : postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                               1/3 
+  Verifying        : postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                                                                                                                        2/3 
+  Verifying        : libpq5-13.0-10PGDG.rhel8.x86_64                                                                                                                                                     3/3 
+
+Installed:
+  libpq5-13.0-10PGDG.rhel8.x86_64                    postgresql-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                    postgresql-server-10.14-1.module_el8.2.0+487+53cc39ce.x86_64                   
+
+Complete!
+[root@gc-hmlgo-prd-iaas ~]# service postgresql initdb
+Hint: the preferred way to do this is now "/usr/bin/postgresql-setup --initdb --unit postgresql"
+ * Initializing database in '/var/lib/pgsql/data'
+ * Initialized, logs are in /var/lib/pgsql/initdb_postgresql.log
+ [root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# chkconfig postgresql on
+Note: Forwarding request to 'systemctl enable postgresql.service'.
+Created symlink /etc/systemd/system/multi-user.target.wants/postgresql.service → /usr/lib/systemd/system/postgresql.service.
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# service postgresql start
+Redirecting to /bin/systemctl start postgresql.service
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# vi /var/lib/pgsql/data/postgresql.conf 
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# service postgresql restart
+Redirecting to /bin/systemctl restart postgresql.service
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# service postgresql stop
+Redirecting to /bin/systemctl stop postgresql.service
+[root@gc-hmlgo-prd-iaas ~]# service postgresql start
+Redirecting to /bin/systemctl start postgresql.service
+[root@gc-hmlgo-prd-iaas ~]# 
+[root@gc-hmlgo-prd-iaas ~]# su postgres
+bash-4.4$ psql
+psql: /lib64/libpq.so.5: no version information available (required by psql)
+psql: /lib64/libpq.so.5: no version information available (required by psql)
+could not change directory to "/root": Permission denied
+psql (10.14)
+Type "help" for help.
+
+postgres=# \db
+       List of tablespaces
+    Name    |  Owner   | Location 
+------------+----------+----------
+ pg_default | postgres | 
+ pg_global  | postgres | 
+(2 rows)
+
+postgres=# 
+ 
+ 
+ 
+ 
+ 
+DEPOISDEPOISDEPOIS PARA FAZER O DBEAVER SE CONECTAR REMOTAMENTE... 
+configure a HBA.CONF (/var/lib/pgsql/data/postgresql.conf)
+
+# TYPE  	DATABASE        USER               ADDRESS          METHOD
+
+# "local" is for Unix domain socket connections only
+local      	all              postgres                            trust
+
+# IPv4 local connections:
+#host    	all              all                127.0.0.1/32     md5
+hostssl    	all              all                127.0.0.1/32     md5
+
+# IPv6 local connections:
+#host    	all              all                ::1/128          md5
+hostssl    	all              all                ::1/128          md5
+
+# Allow remote connections for VCAC user.
+#host    	vcac             vcac               0.0.0.0/0        md5
+hostssl    	vcac             vcac               0.0.0.0/0        md5
+hostssl    	vcac             vcac               ::0/0        	 md5
+
+# Allow remote connections for VCAC replication user.
+#host    	vcac             vcac_replication   0.0.0.0/0        md5
+hostssl    	vcac          	 vcac_replication   0.0.0.0/0        md5
+hostssl    	vcac          	 vcac_replication   ::0/0        	 md5
+
+# Allow replication connections by a user with the replication privilege.
+#host    	replication      vcac_replication   0.0.0.0/0        md5
+hostssl    	replication      vcac_replication   0.0.0.0/0        md5
+hostssl    	replication      vcac_replication   ::0/0        	 md5
+
+
+################################################
+
+
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+
+#marcioventura configurou para testes de dbeaver com erro 
+# "local" is for Unix domain socket connections only
+local   all             all                                     peer
+
+#marcioventura
+##local all             postgres                                trust
+
+# IPv4 local connections:
+host    all             all             127.0.0.1/32            ident
+
+#marcioventura
+host    all             all             0.0.0.0/0               trust
+hostssl all             all             0.0.0.0/0               ident
+hostssl all             all             ::0/0                   ident
+hostssl all             all             ::1/128                 ident
+
+# IPv6 local connections:
+host    all             all             ::1/128                 ident
+
+#marcioventura
+host    all             all             0.0.0.0/0               trust
+hostssl all             all             0.0.0.0/0               ident
+hostssl all             all             ::0/0                   ident
+hostssl all             all             ::1/128                 ident
+
+# Allow replication connections from localhost, by a user with the
+# replication privilege.
+local   replication     all                                     peer
+host    replication     all             127.0.0.1/32            ident
+host    replication     all             ::1/128                 ident
+
+#marcioventura
+host    all             all             0.0.0.0/0               trust
+hostssl all             all             0.0.0.0/0               ident
+hostssl all             all             ::0/0                   ident
+hostssl all             all             ::1/128                 ident
+[root@gc-hmlgo-prd-iaas ~]# 
+
+
+
+E CONFIGURE O /var/lib/pgsql/data/postgresql.conf :
+------------------------------------------------------------------------------
+# CONNECTIONS AND AUTHENTICATION
+#------------------------------------------------------------------------------
+
+# - Connection Settings -
+
+listen_addresses = '*'          # what IP address(es) to listen on;
+                                        # comma-separated list of addresses;
+                                        # defaults to 'localhost'; use '*' for all
+                                        # (change requires restart)
+port = 5432                             # (change requires restart)
+max_connections = 3100                  # (change requires restart)
+#superuser_reserved_connections = 3     # (change requires restart)
+#unix_socket_directories = '/var/run/postgresql, /tmp'  # comma-separated list of directories
+                                        # (change requires restart)
