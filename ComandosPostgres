@@ -620,19 +620,31 @@ LANGUAGE plpgsql;
 AJUSTE DE COLUNA EM TABELA:
 alter table cpos_mail_arq ALTER COLUMN MAIL TYPE VARCHAR(150)
 
+ESTATISTICAS DE TABELA: 
+select * from pg_catalog.pg_stat_all_tables 
+select * from pg_catalog.pg_stat_all_tables WHERE relname NOT LIKE 'pg%' AND relname NOT LIKE 'sql\_%'; 
 
 AUTOVACCUM  - VERIFICAÇÃO DA ATIVIDADE DE ESTATISTICAS DE PERFORMANCE
 
 select 
 	now() as "HORA VERIFICAÇÃO", 
 	* from pg_stat_user_tables 
-
 select 
 	now() as "HORA VERIFICAÇÃO", 
 	* from pg_stat_user_tables 
 		where relname = 'cpos_log_rems';
-		
-		
+
+-- ------------------------------------------------------------------------------------------------------------------------------
+-- PG_REPACK para reconstruir objetos de banco de dados PostgreSQL online. Instale a Extension e proceda conforme abaixo:
+-- ------------------------------------------------------------------------------------------------------------------------------
+$ pg_repack --dry-run -d percona --table scott.employee --table scott.departments
+INFO: Dry run enabled, not executing repack
+INFO: repacking table "scott.departments"
+INFO: repacking table "scott.employee"
+
+Referencia de consulta: https://www.percona.com/blog/2019/02/04/pg_repack-rebuild-postgresql-database-objects-online/
+
+
 -- ---------------------------------------------------------------
 -- Verificando o tamanho da tabela em bytes, kbytes e GigaBytes novamente
 -- ---------------------------------------------------------------
