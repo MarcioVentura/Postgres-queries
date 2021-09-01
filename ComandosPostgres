@@ -50,6 +50,8 @@ LISTAR OBJETOS:	select schemaname, tablename from pg_tables where schemaname = '
 				select schemaname, count(1) from pg_sequences where schemaname <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
 				select schemaname, count(1) from PG_VIEWS where SCHEMANAME <> 'pg_catalog' and schemaname <> 'information_schema' group by schemaname order by 1;
 
+LISTAR EXTENSIONS INSTALADAS: select * from pg_extension;
+
 SCHEMAS(Coleção de objetos): SELECT schema_name FROM information_schema.schemata
 							select * from information_schema.information_schema_catalog_name
 							create schema logservico authorization logservico / create schema authorization logservico (create table schema.table...)
