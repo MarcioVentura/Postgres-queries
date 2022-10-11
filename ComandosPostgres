@@ -169,8 +169,8 @@ create user 			XXX with password 'XXX2020';
 GRANT USAGE ON SCHEMA 	XXX TO 			XXX;
 
 CRIAR USUARIO:
-create user datafusion with password 'DevFus20BVS';
-alter user datafusion with password 'DevFus20BVS'
+create user datafusion with password 'senha';
+alter user datafusion with password 'senha'
 GRANT EM TABELAS DO PUBLIC PARA O USUÁRIO:
 grant all privileges on all tables in schema public to novoexperto;
 grant select on all tables in schema public to datafusion;
@@ -185,19 +185,19 @@ GRANT CREATE ON SCHEMA alerta TO striim_user;
 
 VER OS GRANTS:
 Por usuário: SELECT grantee, table_name , privilege_type FROM information_schema.role_table_grants
-WHERE 1=1 AND grantee = 'zabbixcheckdb';
+WHERE 1=1 AND grantee = 'zabbixmonitordb';
 
 SELECT grantee, table_name , privilege_type FROM information_schema.role_table_grants
-WHERE 1=1 AND grantee IN ('zabbixcheckdb','michelle_gregorio','emily_ferreira');
+WHERE 1=1 AND grantee IN ('zabbixmonitordb','marcioventura','bruno_perreira');
 
 Por tabela: SELECT table_name, grantee, privilege_type FROM information_schema.role_table_grants 
-WHERE table_name='cpos_log_rems'
+WHERE table_name='pos_log'
 
 SELECT grantee, table_name , privilege_type FROM information_schema.role_table_g
 REVOGAR GRANTS: revoke truncate, references, trigger on all tables in schema public from zabbixcheckdb;
 
 SELECT * FROM PG_TABLES WHERE SCHEMANAME = 'public' order by 1
-SELECT * FROM PG_TABLES WHERE TABLENAME like 'cpos%'  
+SELECT * FROM PG_TABLES WHERE TABLENAME like 'pos%'  
 select * from pg_catalog.pg_indexes psai order by schemaname
 select * from pg_catalog.pg_sequences ps 
 SELECT * FROM PG_TABLES WHERE TABLEOWNER = 'comunicapi' OR schemaname  = 'PUBLIC';
@@ -234,21 +234,21 @@ where d.datname = 'cpn' and n.nspname = 'public'
 
 CRIAR DBLINK(base prd para prod):
 create extension dblink;
-create server prod_remoto foreign data wrapper dblink options(host '10.77.19.55', dbname 'postgres', port '5432')
-create user mapping for postgres server prod_remoto options (user 'postgres', password 'gcprod');
+create server prod_remoto foreign data wrapper dblink options(host '10.77.195.355', dbname 'postgres', port '5432')
+create user mapping for postgres server prod_remoto options (user 'postgres', password 'ambprod');
 grant usage on foreign server prod_remoto to postgres;
-grant usage on foreign server prod_remeto to corp_replica;
+grant usage on foreign server prod_remeto to ambprod_replica;
 
 O que deu certo: (
 CREATE EXTENSION postgres_fdw;
 
 CREATE SERVER foreign_server
         FOREIGN DATA WRAPPER postgres_fdw
-        OPTIONS (host '10.77.19.55', port '5432', dbname 'postgres');
+        OPTIONS (host '10.77.195.355', port '5432', dbname 'postgres');
 
 CREATE USER MAPPING FOR postgres
         SERVER foreign_server
-        OPTIONS (user 'postgres', password 'gcprod');
+        OPTIONS (user 'postgres', password 'ambprod');
 
 --create role local_user_corp_replica
 		
@@ -256,15 +256,15 @@ CREATE FOREIGN TABLE foreign_table (
         name varchar
 )
         SERVER foreign_server
-        OPTIONS (schema_name 'corp_replica', table_name 'tabelanome');    
+        OPTIONS (schema_name 'ambprod_replica', table_name 'tabelanome');    
 
 
 select * from foreign_table ft 
 fabio
-hilario
+paulo
 marcio
 
-ORACLE:   SELECT * FROM CLIENTESIBM@PROD WHERE USERNAME = 'FABIO'
+ORACLE:   SELECT * FROM CLIENTESIBM1@PROD WHERE USERNAME = 'FABIO'
 POSTGRES: select * from foreign_table ft 
 
 
