@@ -182,6 +182,11 @@ grant select, insert, update, delete on all tables in schema public to striim_us
 GRANT USAGE ON SCHEMA alerta TO striim_user;
 GRANT CREATE ON SCHEMA alerta TO striim_user;
 
+para o usuário manipular qualquer objeto do outro:
+ALTER DEFAULT PRIVILEGES FOR USER SA_user
+IN SCHEMA schema_name
+GRANT SELECT ON TABLES TO READ_user;
+
 
 VER OS GRANTS:
 Por usuário: SELECT grantee, table_name , privilege_type FROM information_schema.role_table_grants
